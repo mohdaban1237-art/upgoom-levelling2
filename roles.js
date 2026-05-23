@@ -21,7 +21,7 @@ client.once(Events.ClientReady, async () => {
   const channel = await client.channels.fetch('1434535059020316797');
 
   const embed = new EmbedBuilder()
-    .setTitle('Pickup A Role For Yourself [One Time]')
+    .setTitle('Pickup A Role For Yourself [Only 1]')
     .setDescription('✧ Choose your role by clicking the button below to connect with like-minded members and get access to role-specific channels and updates.✧')
     .setImage('https://i.postimg.cc/ry5QJn2D/ef16e4e68b0d3cb81e6bb8a8c3258d7e-1.gif')
     .setColor('#d5d5d5');
@@ -89,6 +89,7 @@ client.once(Events.ClientReady, async () => {
 });
 
 client.on(Events.InteractionCreate, async interaction => {
+  try {
 
   if (!interaction.isButton()) return;
 if (
@@ -200,6 +201,12 @@ await db.set(cooldownKey, Date.now());
 await interaction.editReply({
   content: `✅ ${roleName} role added!`
 });
+
+} catch (err) {
+
+  console.log(err);
+
+}
 
 });
 

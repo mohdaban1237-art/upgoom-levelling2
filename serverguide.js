@@ -73,6 +73,10 @@ module.exports = (client) => {
 
     if (interaction.customId !== 'open_guide') return;
 
+  await interaction.deferReply({
+  ephemeral: true
+});
+
     const member = interaction.member;
 
 const isFreelancer = member.roles.cache.has(ROLES.FREELANCER);
@@ -113,8 +117,7 @@ let fields = [
 ` <#1427252950635647011> — General discussions and networking.
  <#1427252950635647015> — Suggestions and feedback.
  <#1432664339516620810> — Memes and fun content.
- <#1432663701521174559> — Off-topic discussions.
- <#1503369346406289549> — Freelancing help and advice.`
+ <#1432663701521174559> — Off-topic discussions.`
   }
 
 ];
@@ -201,10 +204,8 @@ if (
     name: '📢 Promote & Get Clients',
     value:
 ` <#1505230156858396804> — Promote your freelance services.
- <#1502166599422054420> — Browse client hiring posts.
- <#1502200204214927510> — Explore server jobs.
- <#1434953577050407106> — Clients create jobs here.
- <#1433533918937612308> — Promotions and advertisements.`
+ <#1502166599422054420> — Browse freelacers services promo posts.
+ <#1502200204214927510> — Explore server jobs.`
   });
 
 }
@@ -255,6 +256,7 @@ if (isCreator || isClient) {
 ` <#1433032412299788309> — Instagram creators hub.
  <#1502182556571926668> — YouTube creators hub.
  <#1433032745549955142> — Buy and sell creator accounts.
+  <#1433533918937612308> — YT/IG Promotions and advertisements.
  <#1502198379575509062> — Creators VC.`
     },
 
@@ -264,19 +266,26 @@ if (isCreator || isClient) {
 ` <#1434953577050407106> — Create job requests.
  <#1502166599422054420> — Browse freelancers & agencies.
  <#1502200204214927510> — Explore server jobs channel.`
-    },
-
-    {
-      name: '🎨 Freelancer Showcases',
-      value:
-` <#1501871825297342474> — Explore the edits works of our editors.
- <#1501872045187924008> — Explore the designs works of our designers.
- <#1501872159176527981> — Explore the sites/apps of our developers.
- <#1501872466753228800> — Explore the animations/art works of our animators.
-
-Browse freelancer work and directly hire through DMs.`
     }
   );
+
+}
+
+/* =========================
+   CLIENT SHOWCASES
+========================= */
+
+if (isClient) {
+
+  fields.push({
+    name: '🎨 Freelancer Showcases',
+    value:
+` <#1501871825297342474> — Explore the video editing work of our freelancers.
+ <#1501872045187924008> — Explore the designing works of our freelancers.
+ <#1501872159176527981> — Explore the sites and apps built by our freelancers.
+ <#1501872466753228800> — Explore the animation & art works of our freelancers.
+***Browse our best freelancers work and hire them through DMs.***`
+  });
 
 }
 
@@ -287,21 +296,21 @@ Browse freelancer work and directly hire through DMs.`
 let jobsPreview = `
 🔒 Most jobs channels are locked.
 
- <#1498293849540395010> — Unlock channels guide.
+ <#1498293849540395010> — ** Read The Unlock channels guide first!.**
  <#1434954841360433354> — Creator hiring jobs.
  <#1503368196344905859> — Company hiring jobs.
 `;
 
 if (isVideoEditor || isAgency) {
-  jobsPreview += `\n <#1505558906003525653> — Get Genuine Video Editing Warm leads (Creators/Businesses looking for video editors urgently).`;
+  jobsPreview += `\n <#1505558906003525653> — **Get Genuine Video Editing Warm leads** (Creators/Businesses looking for video editors urgently).`;
 }
 
 if (isDesigner || isAgency) {
-  jobsPreview += `\n <#1505559138283819008> — Get Genuine Designing Warm leads (Creators/Businesses looking for designers urgently).`;
+  jobsPreview += `\n <#1505559138283819008> — **Get Genuine Designing Warm leads** (Creators/Businesses looking for designers urgently).`;
 }
 
 if (isDeveloper || isAgency) {
-  jobsPreview += `\n <#1505558994956324955> — Get Genuine Web Development Warm leads (Brands/Businesses looking for developers urgently).`;
+  jobsPreview += `\n <#1505558994956324955> — **Get Genuine Web Development Warm leads** (Brands/Businesses looking for developers urgently).`;
 }
 
 if (!isCreator && !isClient) {
@@ -342,8 +351,7 @@ if (!isCreator && !isClient) {
       });
 
     await interaction.reply({
-      embeds: [guideEmbed],
-      ephemeral: true
+      embeds: [guideEmbed]
     });
 
   });

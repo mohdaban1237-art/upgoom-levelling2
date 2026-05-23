@@ -13,6 +13,15 @@ const {
 module.exports = (client) => {
 
   const userSelections = {};
+  const JOB_LOGS_CHANNEL_ID =
+  '1507827342414843944';
+  async function safeReply(interaction, options) {
+  if (interaction.deferred || interaction.replied) {
+    return await interaction.followUp(options);
+  }
+
+  return await interaction.reply(options);
+}
 
   client.once(Events.ClientReady, async () => {
     console.log('BOT RESTARTED');
@@ -69,34 +78,200 @@ Use the button below to submit a professional job request to the Upgoom server.
   });
 
   async function rejectApplication(
-    interaction,
-    reason
+  interaction,
+  reason,
+  resetField = null
+) {
+
+  if (
+    resetField &&
+    userSelections[interaction.user.id]?.formData
   ) {
-
-    const row = new ActionRowBuilder().addComponents(
-
-      new ButtonBuilder()
-        .setCustomId('retry_job_form')
-        .setLabel('Make Request Again')
-        .setStyle(ButtonStyle.Primary)
-
-    );
-
-    return await interaction.reply({
-
-      content: `❌ ${reason}`,
-
-      components: [row],
-
-      flags: 64
-
-    });
-
+    userSelections[interaction.user.id].formData[resetField] = '';
   }
+
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId('retry_job_form')
+      .setLabel('Make Request Again')
+      .setStyle(ButtonStyle.Primary)
+  );
+
+  return await safeReply(interaction, {
+  content: `❌ ${reason}`,
+  components: [row],
+  flags: 64
+});
+
+}
+
+function getJobFields(service) {
+
+  if (service === 'Video Editing') {
+    return [
+      ['video_type', '🎬 Video Type & Style', 'Short-form reels, YouTube videos, gaming edits, podcasts, ads, documentaries, etc.', TextInputStyle.Paragraph],
+      ['project_description', '📝 Project Details', 'Explain editing style, software required, pacing, etc.', TextInputStyle.Paragraph],
+      ['reference_links', '🔗 Reference Links', 'YouTube/Instagram links showing the editing style you want.', TextInputStyle.Paragraph],
+      ['quantity', '📦 QuantityOf Videos/Timeframe', '5 reels daily / 4 YouTube videos monthly / 30 shorts monthly.', TextInputStyle.Short],
+      ['budget', '💰 Budget', '₹50k/month, $100 per video.', TextInputStyle.Short]
+    ];
+  }
+
+  if (service === 'Thumbnail Design') {
+    return [
+      ['thumbnail_type', '🖼️ Thumbnail Style', 'Gaming, finance, documentary, MrBeast style, anime, reaction, etc.', TextInputStyle.Paragraph],
+      ['project_description', '🎨 Design Requirements', 'Mention text style, emotions, colors, composition, branding, etc.', TextInputStyle.Paragraph],
+      ['reference_links', '🔗 References', 'Paste YouTube channels or thumbnail examples.', TextInputStyle.Paragraph],
+      ['quantity', '📦 Quantity / Frequency', '3 thumbnails weekly / daily uploads / one-time project.', TextInputStyle.Short],
+      ['budget', '💰 Budget', '$10 per thumbnail / $500 monthly.', TextInputStyle.Short]
+    ];
+  }
+
+  if (service === 'Graphic Design') {
+    return [
+      ['design_type', '🎨 Design Type', 'Branding, posters, social media posts, logos, UI, banners, etc.', TextInputStyle.Paragraph],
+      ['project_description', '📝 Project Details', 'Explain brand style, audience, colors, purpose, dimensions, etc.', TextInputStyle.Paragraph],
+      ['reference_links', '🔗 Brand Assets', 'Behance, Pinterest, Drive links, existing branding, etc.', TextInputStyle.Paragraph],
+      ['quantity', '📦 Deliverables Needed', '5 Instagram posts, logo package, full brand kit, etc.', TextInputStyle.Short],
+      ['budget', '💰 Budget', '₹10k project budget / $1000 monthly.', TextInputStyle.Short]
+    ];
+  }
+
+  if (service === 'Web Development') {
+    return [
+      ['website_type', '💻 Website Type', 'Portfolio, SaaS, agency website, eCommerce, dashboard, landing page, etc.', TextInputStyle.Paragraph],
+      ['tech_preference', '🧩 Tech Preference', 'WordPress, React, Next.js, Shopify, custom code, etc.', TextInputStyle.Short],
+      ['project_description', '⚙️ Features Required', 'Login system, payment gateway, CMS, animations, admin panel, etc.', TextInputStyle.Paragraph],
+      ['reference_links', '🔗 References', 'Share websites or UI styles you like.', TextInputStyle.Paragraph],
+      ['budget', '💰 Budget', '$300 budget / $2000 monthly.', TextInputStyle.Short]
+    ];
+  }
+
+  if (service === 'Script Writing') {
+    return [
+      ['content_type', '✍️ Content Type', 'YouTube documentary, shorts hooks, ads, storytelling, explainer, etc.', TextInputStyle.Paragraph],
+      ['project_description', '📝 Script Requirements', 'Tone, target audience, pacing, storytelling style, CTA, etc.', TextInputStyle.Paragraph],
+      ['reference_links', '🔗 References', 'Channels/videos/scripts you want similar quality from.', TextInputStyle.Paragraph],
+      ['quantity', '📦 Length / Frequency', '60 sec shorts daily / 10 min scripts weekly.', TextInputStyle.Short],
+      ['budget', '💰 Budget & Delivery', '₹2k per script / 24h turnaround needed.', TextInputStyle.Short]
+    ];
+  }
+
+  if (service === 'Motion Design') {
+    return [
+      ['motion_type', '✨ Motion Type', 'Explainer animation, UI motion, logo animation, reels motion graphics, etc.', TextInputStyle.Paragraph],
+      ['project_description', '🎞️ Animation Details', 'Mention transitions, typography, effects, pacing, branding, etc.', TextInputStyle.Paragraph],
+      ['reference_links', '🔗 References', 'Share animation styles/videos you want matched.', TextInputStyle.Paragraph],
+      ['quantity', '📦 Duration / Quantity', '30 sec promo / 10 reels monthly / one-time project.', TextInputStyle.Short],
+      ['budget', '💰 Budget & Timeline', '$15k project budget.', TextInputStyle.Short]
+    ];
+  }
+
+  return [
+    ['animation_type', '🎞️ Animation Type', '2D explainer, anime, 3D product animation, cinematic scenes, rigging, etc.', TextInputStyle.Paragraph],
+    ['project_description', '📝 Project Details', 'Explain story, characters, environments, animation style, rendering quality, etc.', TextInputStyle.Paragraph],
+    ['reference_links', '🔗 References / Assets', 'Reference videos, concept art, scripts, models, storyboard links, etc.', TextInputStyle.Paragraph],
+    ['quantity', '📦 Animation Length', '15 sec cinematic / full episode / looping animation / trailer.', TextInputStyle.Short],
+    ['budget', '💰 Budget & Deadline', '$500 budget / needed before launch date.', TextInputStyle.Short]
+  ];
+
+}
+
+function buildJobModal(service, savedData = {}) {
+
+  const modal = new ModalBuilder()
+    .setCustomId('job_modal')
+    .setTitle('Job Request Form');
+
+  const fields = getJobFields(service);
+
+  for (const field of fields) {
+    const input = new TextInputBuilder()
+      .setCustomId(field[0])
+      .setLabel(field[1])
+      .setPlaceholder(field[2])
+      .setStyle(field[3])
+      .setRequired(true);
+
+    if (savedData[field[0]]) {
+      input.setValue(savedData[field[0]]);
+    }
+
+    modal.addComponents(
+      new ActionRowBuilder().addComponents(input)
+    );
+  }
+
+  return modal;
+
+}
 
   client.on(Events.InteractionCreate, async interaction => {
 
-    try {
+  try {
+
+
+    function validateField(fieldId, value) {
+
+  const text = value.toLowerCase();
+
+  if (fieldId === 'reference_links') {
+    return text.includes('http');
+  }
+
+  if (
+    fieldId === 'budget'
+  ) {
+
+    return (
+      /\d/.test(text) &&
+      (
+        text.includes('$') ||
+        text.includes('₹') ||
+        text.includes('€') ||
+        text.includes('usd') ||
+        text.includes('inr')
+      )
+    );
+
+  }
+
+  if (
+    fieldId.includes('quantity') ||
+    fieldId.includes('duration') ||
+    fieldId.includes('length')
+  ) {
+
+    return (
+      /\d/.test(text) ||
+      text.includes('daily') ||
+      text.includes('weekly') ||
+      text.includes('monthly')
+    );
+
+  }
+
+  if (
+    fieldId.includes('type') ||
+    fieldId.includes('style')
+  ) {
+
+    return text.length > 8;
+  }
+
+  if (
+    fieldId === 'project_description'
+  ) {
+
+    return (
+      text.split(/\s+/).length >= 15
+    );
+
+  }
+
+  return text.length >= 5;
+
+}
 
       // =========================
       // BUTTON CLICK
@@ -106,6 +281,9 @@ Use the button below to submit a professional job request to the Upgoom server.
         interaction.isButton() &&
         interaction.customId === 'create_job'
       ) {
+        await interaction.deferReply({
+  flags: 64
+});
 
         const member = interaction.member;
 
@@ -116,9 +294,8 @@ Use the button below to submit a professional job request to the Upgoom server.
 
         if (!allowed) {
 
-          return await interaction.reply({
-            content: '⚠️ Only Members with the <@&1427252949863891001>, <@&1427252949863891000> or <@&1427252949863891002> Role can post jobs.',
-            flags: 64
+          return await interaction.editReply({
+            content: '⚠️ Only Members with the <@&1427252949863891001>, <@&1427252949863891000> or <@&1427252949863891002> Role can post jobs.'
           });
 
         }
@@ -149,15 +326,10 @@ Use the button below to submit a professional job request to the Upgoom server.
 
         );
 
-        return await interaction.reply({
-
-          content: 'Select who you are:',
-
-          components: [row],
-
-          flags: 64
-
-        });
+return await safeReply(interaction, {
+        content: 'Select who you are:',
+  components: [row]
+});
 
       }
 
@@ -187,47 +359,35 @@ userSelections[interaction.user.id].who =
             .setCustomId('service_select')
             .setPlaceholder('Select Required Service')
             .addOptions(
-              {
-                label: 'Video Editing',
-                value: 'Video Editing'
-              },
-              {
-                label: 'Thumbnail Design',
-                value: 'Thumbnail Design'
-              },
-              {
-                label: 'Graphic Design',
-                value: 'Graphic Design'
-              },
-              {
-                label: 'Animation',
-                value: 'Animation'
-              },
-              {
-                label: 'Motion Graphics',
-                value: 'Motion Graphics'
-              },
-              {
-                label: 'UI/UX Design',
-                value: 'UI/UX Design'
-              },
-              {
-                label: 'Web Development',
-                value: 'Web Development'
-              },
-              {
-                label: 'Content Management',
-                value: 'Content Management'
-              },
-              {
-                label: 'Script Writing',
-                value: 'Script Writing'
-              },
-              {
-                label: 'Other',
-                value: 'Other'
-              }
-            )
+  {
+    label: '🎬 Video Editing',
+    value: 'Video Editing'
+  },
+  {
+    label: '🖼️ Thumbnail Design',
+    value: 'Thumbnail Design'
+  },
+  {
+    label: '🎨 Graphic Design',
+    value: 'Graphic Design'
+  },
+  {
+    label: '💻 Web Development',
+    value: 'Web Development'
+  },
+  {
+    label: '✍️ Script Writing',
+    value: 'Script Writing'
+  },
+  {
+    label: '✨ Motion Design',
+    value: 'Motion Design'
+  },
+  {
+    label: '🎞️ 2D / 3D Animation',
+    value: '2D / 3D Animation'
+  }
+)
 
         );
 
@@ -241,9 +401,9 @@ userSelections[interaction.user.id].who =
 
       }
 
-      // =========================
-      // SERVICE SELECT
-      // =========================
+// =========================
+// SERVICE SELECT
+// =========================
 
 if (
   interaction.isStringSelectMenu() &&
@@ -251,9 +411,7 @@ if (
 ) {
 
   if (!userSelections[interaction.user.id]) {
-
     userSelections[interaction.user.id] = {};
-
   }
 
   userSelections[interaction.user.id].service =
@@ -261,377 +419,36 @@ if (
 
   const service = interaction.values[0];
 
-  const modal = new ModalBuilder()
-    .setCustomId('job_modal')
-    .setTitle('Job Application Form');
+  const modal = buildJobModal(service);
 
-  // =========================
-  // VIDEO / MOTION / ANIMATION
-  // =========================
-
-  if (
-  service === 'Video Editing' ||
-  service === 'Motion Graphics' ||
-  service === 'Animation'
-) {
-
-  const referenceInput = new TextInputBuilder()
-    .setCustomId('reference_links')
-    .setLabel('Editing Style References')
-    .setPlaceholder(
-      'Reference videos/channels/styles'
-    )
-    .setStyle(TextInputStyle.Paragraph)
-    .setRequired(true);
-
-  const descriptionInput = new TextInputBuilder()
-    .setCustomId('project_description')
-    .setLabel('Describe Your Project')
-    .setPlaceholder(
-      'Explain your project properly'
-    )
-    .setStyle(TextInputStyle.Paragraph)
-    .setRequired(true);
-
-  const durationInput = new TextInputBuilder()
-    .setCustomId('video_duration')
-    .setLabel('Video Duration')
-    .setPlaceholder(
-      'Short Form / Mid Form / Long Form'
-    )
-    .setStyle(TextInputStyle.Short)
-    .setRequired(true);
-
-  const quantityInput = new TextInputBuilder()
-    .setCustomId('video_quantity')
-    .setLabel('Number Of Videos')
-    .setPlaceholder(
-      '1 video / 4 videos weekly / ongoing'
-    )
-    .setStyle(TextInputStyle.Short)
-    .setRequired(true);
-
-  const softwareInput = new TextInputBuilder()
-    .setCustomId('software_needed')
-    .setLabel('Software Needed')
-    .setPlaceholder(
-      'Premiere Pro, After Effects etc.'
-    )
-    .setStyle(TextInputStyle.Short)
-    .setRequired(true);
-
-  modal.addComponents(
-    new ActionRowBuilder().addComponents(referenceInput),
-    new ActionRowBuilder().addComponents(descriptionInput),
-    new ActionRowBuilder().addComponents(durationInput),
-    new ActionRowBuilder().addComponents(quantityInput),
-    new ActionRowBuilder().addComponents(softwareInput)
-  );
-
-}
-  // =========================
-  // DESIGN SERVICES
-  // =========================
-
-  else if (
-  service === 'Thumbnail Design' ||
-  service === 'Graphic Design'
-) {
-
-  const referenceInput = new TextInputBuilder()
-    .setCustomId('reference_links')
-    .setLabel('Design References')
-    .setPlaceholder(
-      'Behance, Pinterest, examples etc.'
-    )
-    .setStyle(TextInputStyle.Paragraph)
-    .setRequired(true);
-
-  const descriptionInput = new TextInputBuilder()
-    .setCustomId('project_description')
-    .setLabel('Describe Your Design Project')
-    .setPlaceholder(
-      'Explain the design requirements'
-    )
-    .setStyle(TextInputStyle.Paragraph)
-    .setRequired(true);
-
-  const quantityInput = new TextInputBuilder()
-    .setCustomId('design_quantity')
-    .setLabel('Quantity Of Designs')
-    .setPlaceholder(
-      '2 thumbnails / 10 posts etc.'
-    )
-    .setStyle(TextInputStyle.Short)
-    .setRequired(true);
-
-  const budgetInput = new TextInputBuilder()
-    .setCustomId('budget')
-    .setLabel('Budget Range')
-    .setPlaceholder(
-      '$50 / ₹2000 / €20 etc.'
-    )
-    .setStyle(TextInputStyle.Short)
-    .setRequired(true);
-
-  const paymentInput = new TextInputBuilder()
-    .setCustomId('payment_method')
-    .setLabel('Payment Method')
-    .setPlaceholder(
-      'PayPal, Crypto, UPI etc.'
-    )
-    .setStyle(TextInputStyle.Short)
-    .setRequired(true);
-
-  const deadlineInput = new TextInputBuilder()
-    .setCustomId('deadline')
-    .setLabel('Deadline / Turnaround Time')
-    .setStyle(TextInputStyle.Short)
-    .setRequired(true);
-
-  modal.addComponents(
-    new ActionRowBuilder().addComponents(referenceInput),
-    new ActionRowBuilder().addComponents(descriptionInput),
-    new ActionRowBuilder().addComponents(quantityInput),
-    new ActionRowBuilder().addComponents(budgetInput),
-    new ActionRowBuilder().addComponents(paymentInput)
-  );
-
-}
-
-// =========================
-// UI UX + WEB DEV
-// =========================
-
-else if (
-  service === 'UI/UX Design' ||
-  service === 'Web Development'
-) {
-
-  const referenceInput = new TextInputBuilder()
-    .setCustomId('reference_links')
-    .setLabel('Website/App References')
-    .setPlaceholder(
-      'Reference websites, apps, UI inspiration'
-    )
-    .setStyle(TextInputStyle.Paragraph)
-    .setRequired(true);
-
-  const descriptionInput = new TextInputBuilder()
-    .setCustomId('project_description')
-    .setLabel('Describe Your Project')
-    .setPlaceholder(
-      'Explain pages, features and requirements'
-    )
-    .setStyle(TextInputStyle.Paragraph)
-    .setRequired(true);
-
-  const pagesInput = new TextInputBuilder()
-    .setCustomId('pages_needed')
-    .setLabel('Pages / Screens Needed')
-    .setPlaceholder(
-      'Landing page / 5 pages / dashboard etc.'
-    )
-    .setStyle(TextInputStyle.Short)
-    .setRequired(true);
-
-  const platformInput = new TextInputBuilder()
-    .setCustomId('platform_needed')
-    .setLabel('Platform / Stack Needed')
-    .setPlaceholder(
-      'Figma, React, Next.js, WordPress etc.'
-    )
-    .setStyle(TextInputStyle.Short)
-    .setRequired(true);
-
-  const budgetInput = new TextInputBuilder()
-    .setCustomId('budget')
-    .setLabel('Budget Range')
-    .setPlaceholder(
-      '$100 / ₹5000 / €50 etc.'
-    )
-    .setStyle(TextInputStyle.Short)
-    .setRequired(true);
-
-  modal.addComponents(
-    new ActionRowBuilder().addComponents(referenceInput),
-    new ActionRowBuilder().addComponents(descriptionInput),
-    new ActionRowBuilder().addComponents(pagesInput),
-    new ActionRowBuilder().addComponents(platformInput),
-    new ActionRowBuilder().addComponents(budgetInput)
-  );
-
-}
-
-else if (
-  service === 'UI/UX Design' ||
-  service === 'Web Development'
-) {
-
-  const pages =
-    interaction.fields.getTextInputValue('pages_needed');
-
-  const platform =
-    interaction.fields.getTextInputValue('platform_needed');
-
-  extraFields = [
-
-    {
-      name: '📄 Pages / Screens',
-      value: pages,
-      inline: true
-    },
-
-    {
-      name: '🧩 Platform / Stack',
-      value: platform,
-      inline: true
-    }
-
-  ];
-
-}
-
-  // =========================
-  // DEFAULT SERVICES
-  // =========================
-
-  else {
-
-    const referenceInput = new TextInputBuilder()
-      .setCustomId('reference_links')
-      .setLabel('Reference Examples')
-      .setStyle(TextInputStyle.Paragraph)
-      .setRequired(false);
-
-    const descriptionInput = new TextInputBuilder()
-      .setCustomId('project_description')
-      .setLabel('Describe Your Project')
-      .setStyle(TextInputStyle.Paragraph)
-      .setRequired(true);
-
-    const budgetInput = new TextInputBuilder()
-      .setCustomId('budget')
-      .setLabel('Budget Range')
-      .setStyle(TextInputStyle.Short)
-      .setRequired(true);
-
-    const paymentInput = new TextInputBuilder()
-      .setCustomId('payment_method')
-      .setLabel('Payment Method')
-      .setStyle(TextInputStyle.Short)
-      .setRequired(true);
-
-    const deadlineInput = new TextInputBuilder()
-      .setCustomId('deadline')
-      .setLabel('Deadline / Turnaround Time')
-      .setStyle(TextInputStyle.Short)
-      .setRequired(true);
-
-    modal.addComponents(
-      new ActionRowBuilder().addComponents(referenceInput),
-      new ActionRowBuilder().addComponents(descriptionInput),
-      new ActionRowBuilder().addComponents(budgetInput),
-      new ActionRowBuilder().addComponents(paymentInput),
-      new ActionRowBuilder().addComponents(deadlineInput)
-    );
-
-  }
 
   return await interaction.showModal(modal);
 
 }
-
       if (
+  interaction.isButton() &&
+  interaction.customId === 'retry_job_form'
+) {
 
-        interaction.isButton() &&
-        interaction.customId === 'retry_job_form'
+  const service =
+    userSelections[interaction.user.id]?.service;
 
-      ) {
+  if (!service) {
+    return await safeReply(interaction, {
+      content: '❌ Session expired. Please start again.',
+      flags: 64
+    });
+  }
 
-        const saved =
-          userSelections[interaction.user.id];
+  const modal = buildJobModal(
+    service,
+    userSelections[interaction.user.id]?.formData || {}
+  );
 
 
-console.log('USER ID:', interaction.user.id);
-
-console.log(
-  'USER SELECTION:',
-  userSelections[interaction.user.id]
-);
-
-
-console.log(
-'RETRY CLICKED BY:',
-interaction.user.id
-);
-
-console.log(
-'FOUND DATA:',
-saved
-);
-
-console.log(
-'FULL STORAGE:',
-userSelections
-);
-   
-if (!saved) {
-
-  userSelections[interaction.user.id] = {};
+  return await interaction.showModal(modal);
 
 }
-
-        const modal = new ModalBuilder()
-          .setCustomId('job_modal')
-          .setTitle('Project Request Form');
-
-        const referenceInput = new TextInputBuilder()
-          .setCustomId('reference_links')
-          .setLabel('Reference Examples / Inspiration')
-          .setStyle(TextInputStyle.Paragraph)
-          .setRequired(false)
-       .setValue(saved?.formData?.references || '')
-
-        const descriptionInput = new TextInputBuilder()
-          .setCustomId('project_description')
-          .setLabel('Describe Your Project')
-          .setStyle(TextInputStyle.Paragraph)
-          .setRequired(true)
-          .setValue(saved?.formData?.description || '')
-
-        const budgetInput = new TextInputBuilder()
-          .setCustomId('budget')
-          .setLabel('Budget Range')
-          .setStyle(TextInputStyle.Short)
-          .setRequired(true)
-          .setValue(saved?.formData?.budget || '')
-
-        const paymentInput = new TextInputBuilder()
-          .setCustomId('payment_method')
-          .setLabel('Payment Method')
-          .setStyle(TextInputStyle.Short)
-          .setRequired(true)
-          .setValue(saved?.formData?.payment || '')
-
-        const deadlineInput = new TextInputBuilder()
-          .setCustomId('deadline')
-          .setLabel('Deadline / Turnaround Time')
-          .setStyle(TextInputStyle.Short)
-          .setRequired(true)
-          .setValue(saved?.formData?.deadline || '')
-
-        modal.addComponents(
-          new ActionRowBuilder().addComponents(referenceInput),
-          new ActionRowBuilder().addComponents(descriptionInput),
-          new ActionRowBuilder().addComponents(budgetInput),
-          new ActionRowBuilder().addComponents(paymentInput),
-          new ActionRowBuilder().addComponents(deadlineInput)
-        );
-
-        return await interaction.showModal(modal);
-
-      }
 
       // =========================
       // MODAL SUBMIT
@@ -644,6 +461,55 @@ if (!saved) {
 
 
         const data = userSelections[interaction.user.id];
+        if (!data || !data.service) {
+  return await interaction.reply({
+    content: '❌ Session expired. Please start again.',
+    flags: 64
+  });
+}
+
+const formData = {};
+
+const invalidFields = [];
+
+for (const [key, field] of interaction.fields.fields) {
+
+  formData[key] = field.value;
+
+  const valid =
+    validateField(
+      key,
+      field.value
+    );
+
+  if (!valid) {
+    invalidFields.push(key);
+  }
+
+}
+
+if (invalidFields.length > 0) {
+
+  for (const field of invalidFields) {
+
+    formData[field] = '';
+
+  }
+
+  userSelections[interaction.user.id].formData =
+    formData;
+
+  return await rejectApplication(
+
+    interaction,
+
+    'Some fields were filled incorrectly. Please follow the required format properly by reading placeholders of fields.'
+
+  );
+
+}
+
+
 
         const references =
           interaction.fields.getTextInputValue('reference_links') ||
@@ -656,11 +522,13 @@ if (!saved) {
 
           return await rejectApplication(
 
-            interaction,
+  interaction,
 
-            'Reference section must contain valid links.'
+  'Reference section must contain valid links.',
 
-          );
+  'reference_links'
+
+);
 
         }
 
@@ -677,6 +545,8 @@ if (wordCount < 20) {
 
   const channel =
     interaction.channel;
+
+    userSelections[interaction.user.id].formData.project_description = '';
 
   await interaction.reply({
 
@@ -716,7 +586,7 @@ if (wordCount < 20) {
         
 
         const budget =
-          interaction.fields.getTextInputValue('budget');
+  interaction.fields.getTextInputValue('budget');
 
         const lowerBudget = budget.toLowerCase();
 
@@ -788,106 +658,14 @@ if (wordCount < 20) {
 
         }
 
-        const payment =
-          interaction.fields.getTextInputValue('payment_method');
-
           const service =
   data.service;
 
-let extraFields = [];
-
-if (
-  service === 'Video Editing' ||
-  service === 'Motion Graphics' ||
-  service === 'Animation'
-) {
-
-  const duration =
-    interaction.fields.getTextInputValue('video_duration');
-
-  const quantity =
-    interaction.fields.getTextInputValue('video_quantity');
-
-  const software =
-    interaction.fields.getTextInputValue('software_needed');
-
-  extraFields = [
-
-    {
-      name: '🎬 Video Duration',
-      value: duration,
-      inline: true
-    },
-
-    {
-      name: '📦 Number Of Videos',
-      value: quantity,
-      inline: true
-    },
-
-    {
-      name: '💻 Software Needed',
-      value: software,
-      inline: true
-    }
-
-  ];
-
-}
-
-else if (
-  service === 'Thumbnail Design' ||
-  service === 'Graphic Design'
-) {
-
-  const quantity =
-    interaction.fields.getTextInputValue('design_quantity');
-
-  extraFields = [
-
-    {
-      name: '🖼 Design Quantity',
-      value: quantity,
-      inline: true
-    }
-
-  ];
-
-}
-
-        const validPayments = [
-
-          'paypal',
-          'crypto',
-          'upi',
-          'wise',
-          'bank'
-
-        ];
-
-        const paymentValid = validPayments.some(method =>
-          payment.toLowerCase().includes(method)
-        );
-
-        if (!paymentValid) {
-
-          return await rejectApplication(
-
-            interaction,
-
-            'Invalid payment method.'
-
-          );
-
-        }
-
-        const deadline =
-          interaction.fields.getTextInputValue('deadline');
+        
 
         if (!data) {
           return await interaction.reply({
             content: '❌ Session expired. Please submit the form again.',
-            flags: 64
           });
         }
 
@@ -895,13 +673,7 @@ else if (
           userSelections[interaction.user.id] = {};
         }
 
-        userSelections[interaction.user.id].formData = {
-          references,
-          description,
-          budget,
-          payment,
-          deadline
-        };
+        userSelections[interaction.user.id].formData = formData;
 
         console.log('SAVED DATA:', userSelections[interaction.user.id]);
 
@@ -935,12 +707,6 @@ else if (
             },
 
             {
-              name: '⏳ Timeline',
-              value: deadline,
-              inline: true
-            },
-
-            {
               name: '📝 Project Details',
               value:
                 description.length > 1000
@@ -951,12 +717,6 @@ else if (
             {
               name: '🔗 References',
               value: references
-            },
-
-            {
-              name: '💳 Payment Method',
-              value: payment,
-              inline: true
             },
 
             {

@@ -12,10 +12,12 @@ const {
 } = require('discord.js');
 
 
-const client = new Client({
+
 
 const userTickets = {};
 const ticketLogs = {};
+
+const client = new Client({
 
 
 intents: [
@@ -92,6 +94,9 @@ client.on('interactionCreate', async (interaction) => {
   if (!interaction.isButton()) return;
 
   if (interaction.customId !== 'create_scam_ticket') return;
+  await interaction.deferReply({
+  ephemeral: true
+});
 
   const userId = interaction.user.id;
 
@@ -108,10 +113,9 @@ client.on('interactionCreate', async (interaction) => {
 
   if (userTickets[userId].length >= 5) {
 
-    return interaction.reply({
+    return interaction.editReply({
       content:
 '⚠️ You already created 5 report tickets this month.',
-      ephemeral: true
     });
 
   }
@@ -151,12 +155,10 @@ client.on('interactionCreate', async (interaction) => {
 
   ticketLogs[channel.id] = [];
 
-  await interaction.reply({
+  await interaction.editReply({
 
     content:
-`✅ Your report ticket has been created: ${channel}`,
-
-    ephemeral: true
+`✅ Your report ticket has been created: ${channel}`
 
   });
 

@@ -43,6 +43,10 @@ const ticketTimeouts = new Map();
         interaction.customId === 'create_scam_ticket'
       ) {
 
+        await interaction.deferReply({
+  ephemeral: true
+});
+
         const existingTicket = interaction.guild.channels.cache.find(
           ch =>
             ch.topic === interaction.user.id
@@ -50,7 +54,7 @@ const ticketTimeouts = new Map();
 
         if (existingTicket) {
 
-          return interaction.reply({
+          return interaction.editReply({
             content: `❌ You already have an open ticket: ${existingTicket}`,
             ephemeral: true
           });
@@ -253,8 +257,7 @@ ticketTimeouts.set(interaction.user.id, {
 
 
         await interaction.reply({
-          content: `✅ Your scam report ticket has been created: ${ticketChannel}`,
-          ephemeral: true
+          content: `✅ Your scam report ticket has been created: ${ticketChannel}`
         });
 
       }
@@ -419,6 +422,7 @@ if (timerData) {
   interaction.isButton() &&
   interaction.customId === 'close_ticket'
 ) {
+  await interaction.deferReply();
 
   const timerData =
     ticketTimeouts.get(interaction.channel.topic);
@@ -432,9 +436,9 @@ if (timerData) {
 
   }
 
-  await interaction.reply({
-    content: '🔒 Closing ticket in 5 seconds...'
-  });
+  await interaction.editReply({
+  content: '🔒 Closing ticket in 5 seconds...'
+});
 
   setTimeout(async () => {
 
@@ -455,6 +459,7 @@ if (timerData) {
         interaction.isButton() &&
         interaction.customId === 'false_report'
       ) {
+        await interaction.deferReply();
 
         const embed = new EmbedBuilder()
           .setColor('#808080')
@@ -463,9 +468,9 @@ if (timerData) {
 `This report has been marked as a false report by support team.`
           );
 
-        await interaction.reply({
-          embeds: [embed]
-        });
+        await interaction.editReply({
+  embeds: [embed]
+});
 
       }
 
@@ -478,6 +483,8 @@ if (timerData) {
         interaction.isButton() &&
         interaction.customId === 'confirm_scam'
       ) {
+
+      await interaction.deferReply();
 
         const messages = await interaction.channel.messages.fetch({
           limit: 20
@@ -534,9 +541,9 @@ if (timerData) {
         });
 
 
-        await interaction.reply({
-          content: '✅ User marked as confirmed scammer.'
-        });
+        await interaction.editReply({
+  content: '✅ User marked as confirmed scammer.'
+});
 
       }
 
