@@ -68,14 +68,13 @@ module.exports = (client) => {
   ========================= */
 
   client.on(Events.InteractionCreate, async (interaction) => {
-
+  try {
     if (!interaction.isButton()) return;
-
     if (interaction.customId !== 'open_guide') return;
 
   await interaction.deferReply({
-  ephemeral: true
-});
+flags: 64
+  });
 
     const member = interaction.member;
 
@@ -350,10 +349,26 @@ if (!isCreator && !isClient) {
         text: 'UpGoom • Freelancers × Creators × Agencies'
       });
 
-    await interaction.reply({
+        await interaction.editReply({
       embeds: [guideEmbed]
     });
 
-  });
+  } catch (error) {
+    console.error('Guide interaction error:', error);
+
+    if (!interaction.replied && !interaction.deferred) {
+      await interaction.reply({
+        content: 'Something went wrong while opening your guide. Please try again.',
+        flags: 64
+      }).catch(() => {});
+    } else {
+      await interaction.editReply({
+        content: 'Something went wrong while opening your guide. Please try again.',
+        embeds: [],
+        components: []
+      }).catch(() => {});
+    }
+  }
+});
 
 };
