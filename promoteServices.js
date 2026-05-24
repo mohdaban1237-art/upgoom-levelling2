@@ -6,7 +6,8 @@ const {
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
-StringSelectMenuBuilder
+StringSelectMenuBuilder,
+Events
 
 } = require('discord.js');
 
@@ -79,8 +80,7 @@ const AGENCY_ROLE_ID =
   // READY
   // =========================
 
-  client.once('ready', async () => {
-
+client.once(Events.ClientReady, async () => {
     console.log('Promote services loaded');
 
     const channel =
@@ -128,6 +128,22 @@ Click the button below to create your listing.`
 
       );
 
+      const existingMessages = await channel.messages.fetch({ limit: 20 });
+
+const alreadySent = existingMessages.find(msg =>
+  msg.author.id === client.user.id &&
+  msg.components?.some(row =>
+    row.components?.some(component =>
+      component.customId === 'create_listing'
+    )
+  )
+);
+
+if (alreadySent) {
+  console.log('Promote services embed already exists, skipping send.');
+  return;
+}
+
     await channel.send({
 
       embeds: [embed],
@@ -142,8 +158,7 @@ Click the button below to create your listing.`
   // INTERACTIONS
   // =========================
 
-  client.on('interactionCreate', async (interaction) => {
-
+client.on(Events.InteractionCreate, async (interaction) => {
     try {
 
       // =========================
@@ -196,7 +211,7 @@ if (
 
     components: [row],
 
-    ephemeral: true
+    flags: 64
 
   });
 
@@ -665,7 +680,7 @@ if (
 
     content:
 '📸 Upload exactly 2 testimonial screenshots to publish your verified agency listing.',
-    ephemeral: true
+    flags: 64
 
   });
 
@@ -752,7 +767,7 @@ if (!validWebsite) {
     content:
 '❌ Domain must end with .com, .in or .co.in and should roughly match your agency name.',
 
-    ephemeral: true
+    flags: 64
 
   });
 
@@ -779,7 +794,7 @@ if (
     content:
 `❌ You can create another agency listing in ${remaining} hours.`,
 
-    ephemeral: true
+    flags: 64
 
   });
 
@@ -826,7 +841,7 @@ if (
 '📸 Upload exactly 2 testimonials. Your agency listing will only be posted after successful verification.',
     components: [row],
 
-    ephemeral: true
+    flags: 64
 
   });
 
@@ -952,7 +967,7 @@ appliedTags: [
           content:
 '✅ Your listing has been posted successfully.',
 
-          ephemeral: true
+          flags: 64
 
         });
 

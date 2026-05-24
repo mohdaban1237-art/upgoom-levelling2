@@ -4,7 +4,8 @@ const {
   ButtonBuilder,
   ButtonStyle,
   ChannelType,
-  PermissionsBitField
+  PermissionsBitField,
+Events
 } = require('discord.js');
 
 module.exports = (client) => {
@@ -30,7 +31,7 @@ const ticketTimeouts = new Map();
   // BUTTON CLICK
   // =========================
 
-  client.on('interactionCreate', async (interaction) => {
+  client.on(Events.InteractionCreate, async (interaction) => {
 
     try {
 
@@ -44,7 +45,7 @@ const ticketTimeouts = new Map();
       ) {
 
         await interaction.deferReply({
-  ephemeral: true
+  flags: 64
 });
 
         const existingTicket = interaction.guild.channels.cache.find(
@@ -56,7 +57,7 @@ const ticketTimeouts = new Map();
 
           return interaction.editReply({
             content: `❌ You already have an open ticket: ${existingTicket}`,
-            ephemeral: true
+            flags: 64
           });
 
         }
@@ -256,7 +257,7 @@ ticketTimeouts.set(interaction.user.id, {
         openTickets.set(interaction.user.id, ticketChannel.id);
 
 
-        await interaction.reply({
+        await interaction.editReply({
           content: `✅ Your scam report ticket has been created: ${ticketChannel}`
         });
 
@@ -272,7 +273,7 @@ if (
 ) {
 
   await interaction.deferReply({
-    ephemeral: true
+    flags: 64
   });
 
   const logsChannel =
@@ -444,7 +445,7 @@ if (timerData) {
 
     openTickets.delete(interaction.channel.topic);
 
-    await interaction.channel.delete();
+    await interaction.channel.delete().catch(() => {});
 
   }, 5000);
 

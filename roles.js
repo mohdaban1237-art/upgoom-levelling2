@@ -113,6 +113,23 @@ const animatorRole = interaction.guild.roles.cache.find(r => r.name === "Animato
 const clientRole = interaction.guild.roles.cache.find(r => r.name === "Client");
 const creatorRole = interaction.guild.roles.cache.find(r => r.name === "Creator");
 const agencyRole = interaction.guild.roles.cache.find(r => r.name === "Agency");
+const requiredRoles = [
+  editorRole,
+  designRole,
+  developerRole,
+  freelancerRole,
+  animatorRole,
+  clientRole,
+  creatorRole,
+  agencyRole
+];
+
+if (requiredRoles.some(role => !role)) {
+  return interaction.reply({
+    content: '❌ One or more required roles are missing. Please contact staff.',
+    flags: MessageFlags.Ephemeral
+  });
+}
 
   await interaction.deferReply({
   flags: MessageFlags.Ephemeral
